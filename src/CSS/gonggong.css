@@ -1,0 +1,39 @@
+/* 表格 */
+table {
+    width: 100%;
+    font-size: 14px;
+    text-align: center;
+    border-collapse: collapse;
+    color: #666666;
+  }
+  table tr th,
+  table tr td {
+    border: 1px solid #e6e6e6;
+    box-sizing: border-box;
+    height: 40px;
+  }
+  table tr th {
+    background-color: #f4faff;
+    border-left: 0px solid #e6e6e6;
+    border-top: 0px solid #e6e6e6;
+  }
+  table tr th:last-child,
+  table tr td:last-child {
+    border-right: 0px solid #e6e6e6;
+  }
+  table tr td:nth-child(1) {
+    border-left: 0px solid #e6e6e6;
+  }
+  table tr:not(:first-child):hover {
+    background-color: #b9def8;
+  }
+  table tr:nth-child(2n) {
+    background-color: #f4faff;
+  }
+  table tr:hover {
+    background-color: #bfe2ff;
+  }
+  .TDClick{
+    cursor: pointer;
+    color: #FE9E51;
+  }
