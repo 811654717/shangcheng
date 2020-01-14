@@ -64,7 +64,7 @@
               <i class="el-icon-icon-shop iconfont" ></i>
               <span slot="title">商品管理</span>
             </el-menu-item>
-            <el-menu-item index="Audit">
+            <el-menu-item index="order">
               <i class="el-icon-icon-order iconfont"></i>
               <span slot="title">订单管理</span>
             </el-menu-item>

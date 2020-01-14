@@ -5,7 +5,7 @@ import Router from 'vue-router'
 import Head from '../components/shouye/Head'
 import commodityManagement from '../components/commodityManagement/commodity' //商品管理
 import jurisdiction from '../components/rolePermission/jurisdiction' //角色权限
-import Audit from '../components/AuditCenter/AuditCenter' //审核中心
+import orderForm from '../components/orderForm/orderForm' //订单管理
 import login from '../login/login'
 
 Vue.use(Router)
@@ -18,7 +18,7 @@ export default new Router({
       path: '/head', component: Head, name: 'head', children: [
         { path: 'commodity', component: commodityManagement, name: 'commodity' },
         { path: 'jurisdiction', component: jurisdiction, name: 'jurisdiction' },
-        { path: 'Audit', component: Audit, name: 'Audit' },
+        { path: 'order', component: orderForm, name: 'order' },
       ]
     },
   ]

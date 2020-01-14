@@ -351,10 +351,14 @@ export default {
     //改变商品每页数据条数
     commodityPSChange(value) {
       this.commodityPageSize = value;
+      this.search();
     },
     //修改父组件的值
     success(i) {
-      this.administration = i;
+      console.log(i);
+      this.administration = i.one;
+      this.commodityID = i.two;
+      this.TRindex = -1;
     },
     //添加
     add() {

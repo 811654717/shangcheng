@@ -22,19 +22,18 @@
         </div>
         <div>
           <span style="margin-right: 35px">商品图</span>
-          <div>
+          <div style="display:flex">
             <el-upload
               class="upload"
               action="http://up-z1.qiniup.com/"
               list-type="picture-card"
-              :on-remove="handleRemove"
               :before-upload="beforeUploading"
-              :before-remove="beforeRemove"
               :limit="6"
               multiple
               :data="qiniuData"
               :on-exceed="exceed"
               :on-success="success"
+              :show-file-list="false"
               accept="image/jpeg, image/png"
             >
               <i class="el-icon-plus"></i>
@@ -42,8 +41,14 @@
             </el-upload>
             <draggable v-model="dialogImageUrl" @update="datadragEnd">
               <transition-group>
-                <div v-for="item in dialogImageUrl" :key="item.imageUrl" class="drag-item">
+                <div v-for="(item,index) in dialogImageUrl" :key="item.imageUrl" class="drag-item">
                   <img :src="item.imageUrl" alt />
+                  <el-button
+                    type="danger"
+                    icon="el-icon-delete"
+                    @click="handleRemove(index)"
+                    circle
+                  ></el-button>
                 </div>
               </transition-group>
             </draggable>
@@ -98,19 +103,18 @@
         <!-- 15张 -->
         <div>
           <span>图文详情</span>
-          <div>
+          <div style="display:flex">
             <el-upload
               class="upload"
               action="http://up-z1.qiniup.com/"
               list-type="picture-card"
-              :on-remove="handleRemove15"
               :before-upload="beforeUploading15"
-              :before-remove="beforeRemove15"
               :limit="15"
               multiple
               :data="qiniuData15"
               :on-exceed="exceed15"
               :on-success="success15"
+              :show-file-list="false"
               accept="image/jpeg, image/png"
             >
               <i class="el-icon-plus"></i>
@@ -118,8 +122,19 @@
             </el-upload>
             <draggable v-model="dialogImageUrl15" @update="datadragEnd15">
               <transition-group>
-                <div v-for="item in dialogImageUrl15" :key="item.imageUrl" class="drag-item">
+                <div
+                  v-for="(item,index
+                 ) in dialogImageUrl15"
+                  :key="item.imageUrl"
+                  class="drag-item"
+                >
                   <img :src="item.imageUrl" alt />
+                  <el-button
+                    type="danger"
+                    icon="el-icon-delete"
+                    @click="handleRemove15(index)"
+                    circle
+                  ></el-button>
                 </div>
               </transition-group>
             </draggable>
@@ -142,7 +157,7 @@
             >
               <el-option v-for="item in specificationAll" :key="item.value" :value="item.label"></el-option>
             </el-select>
-            <el-checkbox style="margin-left:10px;" v-model="checked">添加规格图片</el-checkbox>
+            <!-- <el-checkbox style="margin-left:10px;" v-model="checked">添加规格图片</el-checkbox> -->
           </div>
           <div class="specification">
             <span>规格值</span>
@@ -157,20 +172,30 @@
             <!-- style="color:#0390FB" -->
             <el-button @click="addSpecification" plain>添加规格值</el-button>
           </div>
-          <div>
+          <div style="display:flex;margin-top:20px;margin-left:40px">
+            <draggable v-model="dialogImageUrl1" @update="datadragEnd1">
+              <transition-group>
+                <div v-for="(item,index) in dialogImageUrl1" :key="item.imageUrl" class="drag-item">
+                  <img :src="item" alt />
+                  <el-button
+                    type="danger"
+                    icon="el-icon-delete"
+                    @click="handleRemove1(index)"
+                    circle
+                  ></el-button>
+                </div>
+              </transition-group>
+            </draggable>
             <el-upload
-              style="margin-top:20px;margin-left:85px"
-              v-if="checked"
               class="upload"
               action="http://up-z1.qiniup.com/"
               list-type="picture-card"
-              :on-success="success1"
-              :on-remove="handleRemove1"
               :before-upload="beforeUploading1"
-              :before-remove="beforeRemove1"
               :limit="this.inputAll.length"
               :data="qiniuData1"
               :on-exceed="exceed1"
+              :on-success="success1"
+              :show-file-list="false"
               accept="image/jpeg, image/png"
             >
               <i class="el-icon-plus"></i>
@@ -180,13 +205,6 @@
                 class="el-upload__tip"
               >(建议尺寸800*800像素,每个规格值最多1张规格图片)</div>
             </el-upload>
-            <!-- <draggable v-model="dialogImageUrl1" @update="datadragEnd1">
-              <transition-group>
-                <div v-for="item in dialogImageUrl1" :key="item" class="drag-item">
-                  <img :src="item" alt />
-                </div>
-              </transition-group>
-            </draggable>-->
           </div>
         </div>
         <div style="margin-bottom: 20px;">
@@ -229,7 +247,7 @@
               <th v-if="specificationTwo != ''">{{specificationTwo}}</th>
               <th style="width:150px">现价(元)</th>
               <th style="width:150px">成本价(元)</th>
-              <th style="width:150px">编号</th>
+              <th style="width:150px">SKU编码</th>
               <th style="width:150px;border-right:0">库存</th>
             </tr>
             <tr v-for="(item,index) in inputAll" :key="index">
@@ -374,7 +392,9 @@ export default {
         token: ""
       },
       specificationOne: "", //第一个规格
+      specificationOneId: "", //第一个规格名id
       specificationTwo: "", //第二个规格
+      specificationTwoId: "", //第二个规格名id
       specificationAll: [
         {
           value: "选项1",
@@ -401,8 +421,10 @@ export default {
       task: "1", // 商品任务状态 0下架 1上架
       popupTrue: false, //弹窗显隐
       yybProductSpecificationList: [], //规格名集合
-      yybProductSkuList: [] //商品属性集合
-      ,imgUrl: '', //主图
+      yybProductSkuList: [], //商品属性集合
+      imgUrl: "", //主图
+      compileTrue: false, //是否是编辑
+      commodityID: "" //商品id
     };
   },
 
@@ -413,23 +435,22 @@ export default {
 
   computed: {},
   watch: {
-    //现价
-    currentPrice: function(params) {
-      this.inputAll.forEach(element => {
-        for (let i = 0; i < element.arr.length; i++) {
-          element.arr[i].currentPrice = this.currentPrice;
-        }
-      });
-    },
-    //成本价
-    costPrice: function(params) {
-      this.inputAll.forEach(element => {
-        console.log(element.arr);
-        for (let i = 0; i < element.arr.length; i++) {
-          element.arr[i].costPrice = this.costPrice;
-        }
-      });
-    }
+    // //现价
+    // currentPrice: function(params) {
+    //   this.inputAll.forEach(element => {
+    //     for (let i = 0; i < element.arr.length; i++) {
+    //       element.arr[i].currentPrice = this.currentPrice;
+    //     }
+    //   });
+    // },
+    // //成本价
+    // costPrice: function(params) {
+    //   this.inputAll.forEach(element => {
+    //     for (let i = 0; i < element.arr.length; i++) {
+    //       element.arr[i].costPrice = this.costPrice;
+    //     }
+    //   });
+    // }
   },
   mounted() {
     this.options = this.classify;
@@ -439,9 +460,183 @@ export default {
       event.stopPropagation();
     };
     this.qiniuToken();
+    console.log(this.$parent.commodityID);
+    if (this.$parent.commodityID != "") {
+      this.compileTrue = true;
+      this.commodityID = this.$parent.commodityID;
+      this.compile();
+    } else {
+      this.compileTrue = false;
+    }
   },
 
   methods: {
+    //获取编辑信息
+    compile() {
+      Vue.axios
+        .get(
+          `/yybProduct/queryProductDetailsByProductId?productId=${this.commodityID}`
+        )
+        .then(res => {
+          console.log(res);
+          if (res.data.status == 200) {
+            this.GLclassifyId = res.data.data.categoryId; //分类id
+            this.originalPrice = res.data.data.productOriginalPrice; //原价
+            this.currentPrice = res.data.data.productCurrentPrice; //现价
+            this.costPrice = res.data.data.productCostPrice; //成本价
+            this.metering = res.data.data.productUnit; //计量单位
+            this.title = res.data.data.productName; //标题
+            this.distribution = String(res.data.data.mailWay); //配送方式
+            this.task = String(res.data.data.productStatus); //商品状态
+            let specification = res.data.data.yybProductSpecificationList; //规格详情
+            let commodityDetails = res.data.data.yybProductSkuList; //商品详情
+            if (specification.length == 1) {
+              this.specificationOne = specification[0].specificationName; //第一个规格名
+              this.specificationOneId = specification[0].specificationId; //第一个规格名id
+              for (
+                let i = 0;
+                i <
+                specification[0].yybProductSpecificationAttributeList.length;
+                i++
+              ) {
+                this.inputAll.push({
+                  oneGG:
+                    specification[0].yybProductSpecificationAttributeList[i]
+                      .attributeValue,
+                  attributeId:
+                    specification[0].yybProductSpecificationAttributeList[i]
+                      .attributeId,
+                  arr: [
+                    {
+                      currentPrice: this.currentPrice,
+                      costPrice: "",
+                      coding: "",
+                      inventory: 0
+                    }
+                  ]
+                });
+              }
+            } else if (specification.length == 2) {
+              this.inputAllTwo = [];
+              this.specificationOne = specification[0].specificationName; //第一个规格名
+              this.specificationOneId = specification[0].specificationId; //第一个规格名id
+              this.specificationTwo = specification[1].specificationName; //第二个规格名
+              this.specificationTwoId = specification[1].specificationId; //第二个规格名id
+              for (
+                let i = 0;
+                i <
+                specification[0].yybProductSpecificationAttributeList.length;
+                i++
+              ) {
+                this.inputAll.push({
+                  oneGG:
+                    specification[0].yybProductSpecificationAttributeList[i]
+                      .attributeValue,
+                  attributeId:
+                    specification[0].yybProductSpecificationAttributeList[i]
+                      .attributeId,
+                  arr: []
+                });
+              }
+              for (
+                let i = 0;
+                i <
+                res.data.data.yybProductSpecificationList[1]
+                  .yybProductSpecificationAttributeList.length;
+                i++
+              ) {
+                this.inputAllTwo.push({
+                  attributeValue:
+                    res.data.data.yybProductSpecificationList[1]
+                      .yybProductSpecificationAttributeList[i].attributeValue
+                });
+                this.inputAll.forEach(item => {
+                  item.arr.push({
+                    attributeValue:
+                      specification[1].yybProductSpecificationAttributeList[i]
+                        .attributeValue,
+                    currentPrice: this.currentPrice,
+                    costPrice: this.costPrice,
+                    coding: "",
+                    inventory: 0,
+                    attributeId:
+                      specification[1].yybProductSpecificationAttributeList[i]
+                        .attributeId
+                  });
+                });
+              }
+              // for (let i = 0; i < this.inputAll.length; i++) {
+              //   for (let l = 0; l < this.inputAll[i].arr.length; l++) {
+              //     commodityDetails.forEach(element => {
+              //       if (
+              //         this.inputAll[i].attributeId == element.attributeId1 &&
+              //         this.inputAll[i].arr[l].attributeId
+              //       ) {
+              //         this.inputAll[i].arr[l].currentPrice =
+              //           element.currentPrice;
+              //         this.inputAll[i].arr[l].costPrice = element.costPrice;
+              //         this.inputAll[i].arr[l].coding = element.skuCode;
+              //         this.inputAll[i].arr[l].inventory = element.inventory;
+              //       }
+              //     });
+              //   }
+              // }
+            }
+            console.log(this.inputAll);
+            for (let i = 0; i < this.inputAll.length; i++) {
+              for (let l = 0; l < this.inputAll[i].arr.length; l++) {
+                commodityDetails.forEach(element => {
+                  if (
+                    this.inputAll[i].attributeId == element.attributeId1 &&
+                    this.inputAll[i].arr[l].attributeId == element.attributeId2
+                  ) {
+                    this.inputAll[i].arr[l].currentPrice = element.currentPrice;
+                    this.inputAll[i].arr[l].costPrice = element.costPrice;
+                    this.inputAll[i].arr[l].coding = element.skuCode;
+                    this.inputAll[i].arr[l].inventory = element.inventory;
+                  }
+                });
+              }
+            }
+            let img6 = res.data.data.yybProductImageList.sort(
+              this.compare("imageSort")
+            );
+            console.log(img6);
+            img6.forEach(element => {
+              this.dialogImageUrl.push({
+                imageUrl: element.imageUrl,
+                imageWidth: element.imageWidth,
+                imageHeight: element.imageHeight
+              });
+            });
+            let img15 = res.data.data.productDetailsImageList.sort(
+              this.compare("imageSort")
+            );
+            console.log(img15);
+            img15.forEach(element => {
+              this.dialogImageUrl15.push({
+                imageUrl: element.imageUrl,
+                imageWidth: element.imageWidth,
+                imageHeight: element.imageHeight
+              });
+            });
+          }
+          res.data.data.yybProductSkuList.forEach(element => {
+            if (this.dialogImageUrl1.indexOf(element.imageUrl) == -1) {
+              this.dialogImageUrl1.push(element.imageUrl);
+            }
+          });
+          console.log(this.dialogImageUrl1);
+        });
+    },
+    //图片排序
+    compare(property) {
+      return function(a, b) {
+        var value1 = a[property];
+        var value2 = b[property];
+        return value1 - value2;
+      };
+    },
     // 获取宽高
     imgWH(i) {
       let that = this;
@@ -502,7 +697,7 @@ export default {
       Vue.axios
         .get(`https://www.baiduyuyue.com/appointment/qiniu/getQiniuUploadToken`)
         .then(res => {
-          console.log(res);
+          // console.log(res);
           if (res.data.status == 200) {
             this.token = res.data.data;
             this.qiniuData.token = res.data.data;
@@ -516,16 +711,8 @@ export default {
       this.qiniuData.key = file.uid;
     },
     //删除
-    handleRemove(file, fileList) {
-      console.log(file);
-      console.log(fileList);
-      for (let i = 0; i < this.dialogImageUrl.length; i++) {
-        let img = this.dialogImageUrl[i].imageUrl.split("baiduyuyue.com/")[1];
-        console.log(img);
-        if (file.uid == img) {
-          this.dialogImageUrl.splice(i, 1);
-        }
-      }
+    handleRemove(i) {
+      this.dialogImageUrl.splice(i, 1);
       console.log(this.dialogImageUrl);
     },
     //上传成功
@@ -561,14 +748,17 @@ export default {
       this.qiniuData15.key = file.uid;
     },
     //删除15
-    handleRemove15(file, fileList) {
-      for (let i = 0; i < this.dialogImageUrl15.length; i++) {
-        let img = this.dialogImageUrl15[i].imageUrl.split("baiduyuyue.com/")[1];
-        console.log(img);
-        if (file.uid == img) {
-          this.dialogImageUrl15.splice(i, 1);
-        }
-      }
+    // handleRemove15(file, fileList) {
+    //   for (let i = 0; i < this.dialogImageUrl15.length; i++) {
+    //     let img = this.dialogImageUrl15[i].imageUrl.split("baiduyuyue.com/")[1];
+    //     console.log(img);
+    //     if (file.uid == img) {
+    //       this.dialogImageUrl15.splice(i, 1);
+    //     }
+    //   }
+    // },
+    handleRemove15(i) {
+      this.dialogImageUrl15.splice(i, 1);
     },
     // 上传15成功
     success15(response, file, fileList) {
@@ -627,10 +817,10 @@ export default {
     //添加第二个规格值
     addSpecificationTwo() {
       for (let i = 0; i < this.inputAllTwo.length; i++) {
-        if (this.inputAllTwo[i].attributeValue == "") {
-          this.$message.warning("请先输入规格值");
-          return;
-        }
+        // if (this.inputAllTwo[i].attributeValue == "") {
+        //   this.$message.warning("请先输入规格值");
+        //   return;
+        // }
       }
       this.inputAllTwo.push({ attributeValue: "" });
       console.log(this.inputAllTwo);
@@ -642,36 +832,69 @@ export default {
         this.$message.warning("请先选择规格名");
         return;
       }
-      for (let i = 0; i < this.inputAllTwo.length; i++) {
-        if (this.inputAllTwo[i].attributeValue == "") {
-          this.$message.warning("请先补充规格值");
-          return;
-        }
-      }
+      // for (let i = 0; i < this.inputAllTwo.length; i++) {
+      //   if (this.inputAllTwo[i].attributeValue == "") {
+      //     this.$message.warning("请先补充规格值");
+      //     return;
+      //   }
+      // }
+      console.log(this.inputAllTwo);
       this.inputAll.forEach(element => {
-        element.arr = [];
+        // element.arr = [];
         console.log(element);
         for (let i = 0; i < this.inputAllTwo.length; i++) {
-          if (this.inputAllTwo[i].attributeValue == "") {
-            element.arr.push({
-              currentPrice: this.currentPrice,
-              costPrice: this.costPrice,
-              coding: "",
-              inventory: 0
-            });
+          if (element.arr[i] != undefined) {
+            if (
+              element.arr[i].attributeValue !=
+              this.inputAllTwo[i].attributeValue
+            ) {
+              element.arr[i].attributeValue = this.inputAllTwo[
+                i
+              ].attributeValue;
+            }
           } else {
-            element.arr.push({
-              attributeValue: this.inputAllTwo[i].attributeValue,
-              currentPrice: this.currentPrice,
-              costPrice: this.costPrice,
-              coding: "",
-              inventory: 0
-            });
+            if (this.inputAllTwo[i].attributeValue == "") {
+              console.log(123);
+              // element.arr.push({
+              //   currentPrice: this.currentPrice,
+              //   costPrice: this.costPrice,
+              //   coding: "",
+              //   inventory: 0
+              // });
+            } else {
+              element.arr.push({
+                attributeValue: this.inputAllTwo[i].attributeValue,
+                currentPrice: this.currentPrice,
+                costPrice: this.costPrice,
+                coding: "",
+                inventory: 0
+              });
+              // element.arr[i].attributeValue = this.inputAllTwo[i].attributeValue;
+              // element.arr[i].currentPrice = this.currentPrice;
+              // element.arr[i].costPrice = this.costPrice;
+              // element.arr[i].coding = "";
+              // element.arr[i].inventory = 0;
+            }
           }
         }
-        console.log(element);
       });
       console.log(this.inputAll);
+      let commodityProperty = this.inputAll;
+      for (let i = 0; i < commodityProperty.length; i++) {
+        if (commodityProperty[i].oneGG == "") {
+          commodityProperty.splice(i, 1);
+        } else {
+          console.log(commodityProperty[i].arr.length);
+
+          for (let l = 0; l < commodityProperty[i].arr.length; l++) {
+            console.log(commodityProperty[i].arr[l]);
+            if (commodityProperty[i].arr[l].attributeValue === undefined) {
+              console.log(commodityProperty[i].arr[l]);
+              commodityProperty[i].arr.splice(l, 1);
+            }
+          }
+        }
+      }
     },
     //上传1张之前
     beforeUploading1(file) {
@@ -679,14 +902,8 @@ export default {
       this.qiniuData1.token = this.token;
     },
     //删除1
-    handleRemove1(file, fileList) {
-      for (let i = 0; i < this.dialogImageUrl1.length; i++) {
-        let img = this.dialogImageUrl1[i].split("baiduyuyue.com/")[1];
-        console.log(img);
-        if (file.uid == img) {
-          this.dialogImageUrl1.splice(i, 1);
-        }
-      }
+    handleRemove1(i) {
+      this.dialogImageUrl1.splice(i, 1);
     },
     //上传1成功
     success1(response, file, fileList) {
@@ -719,11 +936,11 @@ export default {
     //预览
     preview() {
       console.log(this.GLclassifyId, "分类id");
-      // if (this.GLclassifyId == "") {
-      //   this.$message.warning("请先选择分类");
-      //   // categoryId
-      //   return;
-      // }
+      if (this.GLclassifyId == "") {
+        this.$message.warning("请先选择分类");
+        // categoryId
+        return;
+      }
       let imageUrl = ""; //主图
       console.log(this.dialogImageUrl.length);
       if (this.dialogImageUrl.length != 0) {
@@ -801,8 +1018,8 @@ export default {
         //规格名排序
         if (this.specificationTwo == "") {
           if (this.inputAll.length == 0 || this.inputAll[0].oneGG == "") {
-            this.$message.warning("请补充规格值");
-            return;
+            // this.$message.warning("请补充规格值");
+            // return;
           } else {
             yybProductSpecificationList.push({
               specificationName: this.specificationOne,
@@ -817,8 +1034,8 @@ export default {
             return;
           } else {
             if (this.inputAllTwo[0].attributeValue == "") {
-              this.$message.warning("请补充规格值");
-              return;
+              // this.$message.warning("请补充规格值");
+              // return;
             } else {
               yybProductSpecificationList.push(
                 {
@@ -838,6 +1055,23 @@ export default {
         console.log(yybProductSpecificationList);
       }
       this.yybProductSpecificationList = yybProductSpecificationList;
+      let commodityProperty = this.inputAll;
+      for (let i = 0; i < commodityProperty.length; i++) {
+        if (commodityProperty[i].oneGG == "") {
+          commodityProperty.splice(i, 1);
+        } else {
+          console.log(commodityProperty[i].arr.length);
+
+          for (let l = 0; l < commodityProperty[i].arr.length; l++) {
+            console.log(commodityProperty[i].arr[l]);
+            if (commodityProperty[i].arr[l].attributeValue === undefined) {
+              console.log(commodityProperty[i].arr[l]);
+              commodityProperty[i].arr.splice(l, 1);
+            }
+          }
+        }
+      }
+      // console.log(commodityProperty);
       let yybProductSkuList = []; //商品属性集合
       for (let i = 0; i < this.inputAll.length; i++) {
         console.log(this.inputAll[i]);
@@ -875,6 +1109,7 @@ export default {
           }
         }
       }
+      console.log(yybProductSkuList);
       this.yybProductSkuList = yybProductSkuList;
       //价格是否填写
       console.log(this.inputAll);
@@ -1009,7 +1244,24 @@ export default {
               this.$message.warning("请补充规格值");
               return;
             } else {
-              yybProductSpecificationList.push(
+              if (this.compileTrue) {
+                //需要规格id
+                yybProductSpecificationList.push(
+                {
+                  specificationId: this.specificationOneId,
+                  specificationName: this.specificationOne,
+                  specificationSort: 0,
+                  yybProductSpecificationAttributeList: yybProductSpecificationAttributeList0
+                },
+                {
+                  specificationId: this.specificationTwoId,
+                  specificationName: this.specificationTwo,
+                  specificationSort: 1,
+                  yybProductSpecificationAttributeList: yybProductSpecificationAttributeList1
+                }
+              );
+              } else{
+                yybProductSpecificationList.push(
                 {
                   specificationName: this.specificationOne,
                   specificationSort: 0,
@@ -1021,6 +1273,8 @@ export default {
                   yybProductSpecificationAttributeList: yybProductSpecificationAttributeList1
                 }
               );
+              }
+              
             }
           }
         }
@@ -1087,43 +1341,76 @@ export default {
           }
         }
       }
-      let postData = {
-        productName: this.title, //标题
-        categoryId: this.GLclassifyId, //分类id
-        productOriginalPrice: this.originalPrice, //原价
-        productCurrentPrice: this.currentPrice, //现价
-        productCostPrice: this.costPrice, //成本价
-        productStatus: this.task, //商品任务状态 0下架、1上架、3删除
-        mailWay: this.distribution, //配送方式 1快递 2同城 3到店
-        userId: "1", //商户id
-        productUnit: this.metering, //计量单位
-        imageUrl: imageUrl, //主图
-        yybProductImageList: this.dialogImageUrl, //商品图集合
-        yybProductDetailsImageList: this.dialogImageUrl15, //图文详情集合
-        yybProductSpecificationList: yybProductSpecificationList, //商品规格集合
-        yybProductSkuList: yybProductSkuList //单个商品详情集合
-      };
-      console.log(this.inputAll);
-      console.log(postData);
-
-      Vue.axios({
-        method: "post",
-        url: "/yybProduct/insertProduct",
-        data: postData,
-        headers: {
-          "Content-Type": "application/json;charset=UTF-8"
-        }
-      }).then(res => {
-        console.log(res);
-        if (res.data.status == 200) {
-          this.$message.success("商品添加成功");
-          this.$emit("amend", true);
-        }
-      });
+      if (this.compileTrue) {
+        //编辑
+        let postData = {
+          productId: this.commodityID, //商品id
+          productName: this.title, //标题
+          categoryId: this.GLclassifyId, //分类id
+          productOriginalPrice: this.originalPrice, //原价
+          productCurrentPrice: this.currentPrice, //现价
+          productCostPrice: this.costPrice, //成本价
+          productStatus: this.task, //商品任务状态 0下架、1上架、3删除
+          mailWay: this.distribution, //配送方式 1快递 2同城 3到店
+          userId: "1", //商户id
+          productUnit: this.metering, //计量单位
+          imageUrl: imageUrl, //主图
+          yybProductImageList: this.dialogImageUrl, //商品图集合
+          yybProductDetailsImageList: this.dialogImageUrl15, //图文详情集合
+          yybProductSpecificationList: yybProductSpecificationList, //商品规格集合
+          yybProductSkuList: yybProductSkuList //单个商品详情集合
+        };
+        Vue.axios({
+          method: "post",
+          url: "/yybProduct/updateProduct",
+          data: postData,
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8"
+          }
+        }).then(res => {
+          console.log(res);
+          if (res.data.status == 200) {
+            this.$message.success("商品更新成功");
+            this.$emit("amend", {one: true,two: ''});
+          }
+        });
+      } else {
+        //新增
+        let postData = {
+          productName: this.title, //标题
+          categoryId: this.GLclassifyId, //分类id
+          productOriginalPrice: this.originalPrice, //原价
+          productCurrentPrice: this.currentPrice, //现价
+          productCostPrice: this.costPrice, //成本价
+          productStatus: this.task, //商品任务状态 0下架、1上架、3删除
+          mailWay: this.distribution, //配送方式 1快递 2同城 3到店
+          userId: "1", //商户id
+          productUnit: this.metering, //计量单位
+          imageUrl: imageUrl, //主图
+          yybProductImageList: this.dialogImageUrl, //商品图集合
+          yybProductDetailsImageList: this.dialogImageUrl15, //图文详情集合
+          yybProductSpecificationList: yybProductSpecificationList, //商品规格集合
+          yybProductSkuList: yybProductSkuList //单个商品详情集合
+        };
+        Vue.axios({
+          method: "post",
+          url: "/yybProduct/insertProduct",
+          data: postData,
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8"
+          }
+        }).then(res => {
+          console.log(res);
+          if (res.data.status == 200) {
+            this.$message.success("商品添加成功");
+            this.$emit("amend", {one: true,two: ''});
+          }
+        });
+      }
     },
     //返回
     reverseBack() {
-      this.$emit("amend", true);
+      this.$emit("amend", {one: true,two: ''});
     }
   }
 };
