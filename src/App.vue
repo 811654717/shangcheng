@@ -5,7 +5,6 @@
 </template>
 
 <script>
-
 export default {
   name: "App",
   provide() {
@@ -15,12 +14,9 @@ export default {
   },
 
   data() {
-    return (
-      {
-        isRouterAlive: true
-      }
-      
-    );
+    return {
+      isRouterAlive: true
+    };
   },
   methods: {
     reload() {
@@ -38,14 +34,26 @@ export default {
   margin: 0;
   padding: 0;
 }
-#iviewCascader .ivu-select-dropdown{
+#iviewCascader .ivu-select-dropdown {
   max-height: 274px;
 }
-#iviewCascader .ivu-cascader-menu{
+#iviewCascader .ivu-cascader-menu {
   height: 274px;
 }
-#elementTime .el-range-separator{
+#elementTime .el-range-separator {
   width: 6%;
+}
+.el-carousel__item img {
+  width: 100%;
+  height: 100%;
+}
+
+.el-carousel__item:nth-child(2n) {
+  background-color: #99a9bf;
+}
+
+.el-carousel__item:nth-child(2n + 1) {
+  background-color: #d3dce6;
 }
 html,
 body,
@@ -57,7 +65,9 @@ body {
   /* background-color: #8f949a; */
   overflow: hidden;
 }
-
+.page {
+  margin: 7px 0 7px 10px;
+}
 .overflow {
   height: 570px;
   overflow-y: scroll;
@@ -66,7 +76,7 @@ body {
 .overflow::-webkit-scrollbar {
   width: 0px;
 }
-.noData{
+.noData {
   width: 100%;
   display: flex;
   justify-content: center;

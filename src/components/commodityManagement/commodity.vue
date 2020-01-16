@@ -165,6 +165,7 @@ import specification from "./specification"; //详情规格
 export default {
   data() {
     return {
+      userId: '', //商户登录id
       commodityData: [], //商品总数据
       commodityTotal: 0, //商品数据总条数
       commodityPageNum: 1, //商品当前页
@@ -217,6 +218,7 @@ export default {
   },
   computed: {},
   created() {
+    this.userId = sessionStorage.getItem("userId");
     //获取当前时间
     var date = new Date();
     var seperator1 = "-";
@@ -302,7 +304,7 @@ export default {
       this.spinShow = true;
       Vue.axios
         .get(
-          `/yybProduct/queryAllProductListByUserId?userId=${1}&categoryId=${
+          `/yybProduct/queryAllProductListByUserId?userId=${this.userId}&categoryId=${
             this.classifyId
           }&pageNum=1&pageSize=10&productName=${this.title}&productStatus=${
             this.statusId
@@ -328,7 +330,7 @@ export default {
       this.spinShow = true;
       Vue.axios
         .get(
-          `/yybProduct/queryAllProductListByUserId?userId=${1}&categoryId=${
+          `/yybProduct/queryAllProductListByUserId?userId=${this.userId}&categoryId=${
             this.classifyId
           }&pageNum=${this.commodityPageNum}&pageSize=${
             this.commodityPageSize
@@ -359,6 +361,7 @@ export default {
       this.administration = i.one;
       this.commodityID = i.two;
       this.TRindex = -1;
+      this.inquire();
     },
     //添加
     add() {
@@ -368,6 +371,7 @@ export default {
     compile() {
       if (this.TRindex == -1) {
         this.$message.warning("请选择要编辑的商品");
+        return
       } else {
         this.administration = false;
       }
@@ -376,6 +380,7 @@ export default {
     GoodsToDelete() {
       if (this.TRindex == -1) {
         this.$message.warning("请选择要删除的商品");
+        return
       } else {
         Vue.axios({
           method: "post",
@@ -416,7 +421,7 @@ export default {
 <style scoped>
 @import "../../CSS/gonggong.css";
 .overflow {
-  height: 411px;
+  height: 610px;
   overflow-y: scroll;
   overflow-x: hidden;
 }
@@ -468,16 +473,6 @@ export default {
   height: 95%;
 }
 
-iframe {
-  position: absolute;
-  top: 54px;
-  left: 10px;
-  width: 248px;
-  height: 436px;
-}
-.page {
-  margin: 7px 0 7px 10px;
-}
 .commodity {
   height: 100%;
   min-width: 1514px;

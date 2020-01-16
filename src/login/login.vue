@@ -172,38 +172,32 @@ export default {
       if (this.phoneNum != "" && this.password != "") {
         let number = /^\d+$/;
         console.log(number.test(this.phoneNum));
-          //审核人员登录
-          const postData = `userName=${this.phoneNum}&password=${this.password}`;
-          sessionStorage.setItem("auditorId", 2);
-          this.$router.push({ path: '/Head/commodity' });
-          // Vue.axios({
-          //   url: "/auditor/auditorLogin",
-          //   method: "post",
-          //   data: postData
-          // }).then(res => {
-          //   console.log(res);
-          //   if (res.data.status == 200) {
-          //     var this1 = this;
-          //     if (this1.checked) {
-          //       var name = this1.phoneNum;
-          //       var pass = this1.password;
-          //       this1.setCookie(name, pass, 1); //name:账号,pass:密码,1:保存的天数
-          //     } else {
-          //       this1.clearCookie();
-          //     }
-          //     // sessionStorage.setItem("auditorId", res.data.data.auditorId);
-          //     // sessionStorage.setItem("roleId",res.data.data.roleId)
-          //     // sessionStorage.setItem("personnelId",'');
-          //     // sessionStorage.setItem("phone",'');
-          //     // sessionStorage.setItem("loginName", res.data.data.auditorUserName);
-          //     // console.log(sessionStorage.getItem("auditorId"));
-          //     // sessionStorage.setItem("luyou", JSON.stringify(res.data.data.resources));
-          //     // console.log(JSON.parse(sessionStorage.getItem("luyou")));
-          //     this.$router.push({ path: Head });
-          //   } else {
-          //     this.$message.warning("您不是管理员或者账号密码错误！");
-          //   }
-          // });
+        //审核人员登录
+        const postData = `phoneNum=${this.phoneNum}&password=${this.password}`;
+        Vue.axios({
+          url: "/user/merchantLogin",
+          method: "post",
+          data: postData,
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+          }
+        }).then(res => {
+          console.log(res);
+          if (res.data.status == 200) {
+            var this1 = this;
+            if (this1.checked) {
+              var name = this1.phoneNum;
+              var pass = this1.password;
+              this1.setCookie(name, pass, 1); //name:账号,pass:密码,1:保存的天数
+            } else {
+              this1.clearCookie();
+            }
+            sessionStorage.setItem("userId", res.data.data.userId);
+            this.$router.push({ path: "/Head/commodity" });
+          } else {
+            this.$message.warning("您不是商户或者账号密码错误！");
+          }
+        });
       }
     },
 

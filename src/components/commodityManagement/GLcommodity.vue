@@ -28,14 +28,13 @@
               action="http://up-z1.qiniup.com/"
               list-type="picture-card"
               :before-upload="beforeUploading"
-              :limit="6"
               multiple
               :data="qiniuData"
-              :on-exceed="exceed"
               :on-success="success"
               :show-file-list="false"
               accept="image/jpeg, image/png"
             >
+              <!-- :on-exceed="exceed" :limit="6" -->
               <i class="el-icon-plus"></i>
               <div slot="tip" style="color:#999999" class="el-upload__tip">(建议尺寸1200*800像素,最多六张)</div>
             </el-upload>
@@ -109,14 +108,13 @@
               action="http://up-z1.qiniup.com/"
               list-type="picture-card"
               :before-upload="beforeUploading15"
-              :limit="15"
               multiple
               :data="qiniuData15"
-              :on-exceed="exceed15"
               :on-success="success15"
               :show-file-list="false"
               accept="image/jpeg, image/png"
             >
+              <!-- :on-exceed="exceed15" :limit="15" -->
               <i class="el-icon-plus"></i>
               <div slot="tip" style="color:#999999" class="el-upload__tip">(建议尺寸1200*800像素,最多15张)</div>
             </el-upload>
@@ -175,7 +173,7 @@
           <div style="display:flex;margin-top:20px;margin-left:40px">
             <draggable v-model="dialogImageUrl1" @update="datadragEnd1">
               <transition-group>
-                <div v-for="(item,index) in dialogImageUrl1" :key="item.imageUrl" class="drag-item">
+                <div v-for="(item,index) in dialogImageUrl1" :key="item" class="drag-item">
                   <img :src="item" alt />
                   <el-button
                     type="danger"
@@ -191,13 +189,12 @@
               action="http://up-z1.qiniup.com/"
               list-type="picture-card"
               :before-upload="beforeUploading1"
-              :limit="this.inputAll.length"
               :data="qiniuData1"
-              :on-exceed="exceed1"
               :on-success="success1"
               :show-file-list="false"
               accept="image/jpeg, image/png"
             >
+              <!-- :on-exceed="exceed1" :limit="this.inputAll.length" -->
               <i class="el-icon-plus"></i>
               <div
                 slot="tip"
@@ -233,7 +230,7 @@
               ></el-input>
             </div>
             <!-- style="color:#0390FB" -->
-            <el-button @click="addSpecificationTwo" plain>添加规格值</el-button>
+            <el-button style="margin-top:10px;" @click="addSpecificationTwo" plain>添加规格值</el-button>
             <el-button type="primary" @click="SureToAdd" plain>确定添加</el-button>
           </div>
         </div>
@@ -288,8 +285,8 @@
         <span>配送方式</span>
         <div>
           <el-radio v-model="distribution" label="1">快递发货</el-radio>
-          <el-radio v-model="distribution" label="2">同城配送</el-radio>
-          <el-radio v-model="distribution" label="3">到店自提</el-radio>
+          <!-- <el-radio v-model="distribution" label="2">同城配送</el-radio>
+          <el-radio v-model="distribution" label="3">到店自提</el-radio> -->
         </div>
       </div>
       <div class="MultipleChoice">
@@ -342,6 +339,7 @@ export default {
   },
   data() {
     return {
+      userId: '', //商户id
       token: "",
       GLclassifyId: "", //添加或者编辑的分类id
       options: [],
@@ -434,6 +432,9 @@ export default {
   },
 
   computed: {},
+  created() {
+    this.userId = sessionStorage.getItem("userId");
+  },
   watch: {
     // //现价
     // currentPrice: function(params) {
@@ -516,6 +517,19 @@ export default {
                   ]
                 });
               }
+              for (let i = 0; i < this.inputAll.length; i++) {
+                for (let l = 0; l < this.inputAll[i].arr.length; l++) {
+                  commodityDetails.forEach(element => {
+                    if (this.inputAll[i].attributeId == element.attributeId1) {
+                      this.inputAll[i].arr[l].currentPrice =
+                        element.currentPrice;
+                      this.inputAll[i].arr[l].costPrice = element.costPrice;
+                      this.inputAll[i].arr[l].coding = element.skuCode;
+                      this.inputAll[i].arr[l].inventory = element.inventory;
+                    }
+                  });
+                }
+              }
             } else if (specification.length == 2) {
               this.inputAllTwo = [];
               this.specificationOne = specification[0].specificationName; //第一个规格名
@@ -565,43 +579,28 @@ export default {
                   });
                 });
               }
-              // for (let i = 0; i < this.inputAll.length; i++) {
-              //   for (let l = 0; l < this.inputAll[i].arr.length; l++) {
-              //     commodityDetails.forEach(element => {
-              //       if (
-              //         this.inputAll[i].attributeId == element.attributeId1 &&
-              //         this.inputAll[i].arr[l].attributeId
-              //       ) {
-              //         this.inputAll[i].arr[l].currentPrice =
-              //           element.currentPrice;
-              //         this.inputAll[i].arr[l].costPrice = element.costPrice;
-              //         this.inputAll[i].arr[l].coding = element.skuCode;
-              //         this.inputAll[i].arr[l].inventory = element.inventory;
-              //       }
-              //     });
-              //   }
-              // }
-            }
-            console.log(this.inputAll);
-            for (let i = 0; i < this.inputAll.length; i++) {
-              for (let l = 0; l < this.inputAll[i].arr.length; l++) {
-                commodityDetails.forEach(element => {
-                  if (
-                    this.inputAll[i].attributeId == element.attributeId1 &&
-                    this.inputAll[i].arr[l].attributeId == element.attributeId2
-                  ) {
-                    this.inputAll[i].arr[l].currentPrice = element.currentPrice;
-                    this.inputAll[i].arr[l].costPrice = element.costPrice;
-                    this.inputAll[i].arr[l].coding = element.skuCode;
-                    this.inputAll[i].arr[l].inventory = element.inventory;
-                  }
-                });
+              for (let i = 0; i < this.inputAll.length; i++) {
+                for (let l = 0; l < this.inputAll[i].arr.length; l++) {
+                  commodityDetails.forEach(element => {
+                    if (
+                      this.inputAll[i].attributeId == element.attributeId1 &&
+                      this.inputAll[i].arr[l].attributeId ==
+                        element.attributeId2
+                    ) {
+                      this.inputAll[i].arr[l].currentPrice =
+                        element.currentPrice;
+                      this.inputAll[i].arr[l].costPrice = element.costPrice;
+                      this.inputAll[i].arr[l].coding = element.skuCode;
+                      this.inputAll[i].arr[l].inventory = element.inventory;
+                    }
+                  });
+                }
               }
             }
+            // console.log(this.inputAll);
             let img6 = res.data.data.yybProductImageList.sort(
               this.compare("imageSort")
             );
-            console.log(img6);
             img6.forEach(element => {
               this.dialogImageUrl.push({
                 imageUrl: element.imageUrl,
@@ -612,7 +611,6 @@ export default {
             let img15 = res.data.data.productDetailsImageList.sort(
               this.compare("imageSort")
             );
-            console.log(img15);
             img15.forEach(element => {
               this.dialogImageUrl15.push({
                 imageUrl: element.imageUrl,
@@ -626,7 +624,6 @@ export default {
               this.dialogImageUrl1.push(element.imageUrl);
             }
           });
-          console.log(this.dialogImageUrl1);
         });
     },
     //图片排序
@@ -650,7 +647,7 @@ export default {
               img.onload = function() {
                 that.dialogImageUrl[i].imageHeight = img.height;
                 that.dialogImageUrl[i].imageWidth = img.width;
-                console.log(img, img.width, img.height);
+                // console.log(img, img.width, img.height);
               };
             }
           }
@@ -665,7 +662,7 @@ export default {
               img.onload = function() {
                 that.dialogImageUrl15[i].imageHeight = img.height;
                 that.dialogImageUrl15[i].imageWidth = img.width;
-                console.log(img, img.width, img.height);
+                // console.log(img, img.width, img.height);
               };
             }
           }
@@ -690,7 +687,7 @@ export default {
         default:
           break;
       }
-      console.log(that.dialogImageUrl);
+      // console.log(that.dialogImageUrl);
     },
     //获取上传需要的token
     qiniuToken() {
@@ -707,25 +704,31 @@ export default {
     },
     //上传之前
     beforeUploading(file) {
-      console.log(file.uid);
+      // console.log(file.uid);
       this.qiniuData.key = file.uid;
     },
     //删除
     handleRemove(i) {
       this.dialogImageUrl.splice(i, 1);
-      console.log(this.dialogImageUrl);
+      // console.log(this.dialogImageUrl);
     },
     //上传成功
     success(response, file, fileList) {
-      console.log(file);
-      this.dialogImageUrl.push({
-        imageUrl: "https://images.baiduyuyue.com/" + file.uid
-      });
-      this.imgWH(6);
+      // console.log(file);
+      if (this.dialogImageUrl.length > 5) {
+        // console.log(this.dialogImageUrl.length);
+        this.$message.warning("文件超过上限");
+      } else {
+        // console.log(this.dialogImageUrl.length);
+        this.dialogImageUrl.push({
+          imageUrl: "https://images.baiduyuyue.com/" + file.uid
+        });
+        this.imgWH(6);
+      }
     },
     //超出6张
     exceed(files, fileList) {
-      console.log(files, fileList);
+      // console.log(files, fileList);
       this.$message.warning(
         `当前限制选择 6 个文件，本次选择了 ${
           files.length
@@ -741,7 +744,7 @@ export default {
       evt.preventDefault();
       // console.log("拖动前的索引 :" + evt.oldIndex);
       // console.log("拖动后的索引 :" + evt.newIndex);
-      console.log(this.dialogImageUrl, "拖动六张");
+      // console.log(this.dialogImageUrl, "拖动六张");
     },
     //上传15张之前
     beforeUploading15(file) {
@@ -762,14 +765,18 @@ export default {
     },
     // 上传15成功
     success15(response, file, fileList) {
-      this.dialogImageUrl15.push({
-        imageUrl: "https://images.baiduyuyue.com/" + file.uid
-      });
-      this.imgWH(15);
+      if (this.dialogImageUrl15.length > 14) {
+        this.$message.warning("文件超过上限");
+      } else {
+        this.dialogImageUrl15.push({
+          imageUrl: "https://images.baiduyuyue.com/" + file.uid
+        });
+        this.imgWH(15);
+      }
     },
     //超出15张
     exceed15(files, fileList) {
-      console.log(files, fileList);
+      // console.log(files, fileList);
       this.$message.warning(
         `当前限制选择 15 个文件，本次选择了 ${
           files.length
@@ -782,10 +789,10 @@ export default {
     },
     //拖动15张图片
     datadragEnd15(evt) {
-      console.log(evt);
+      // console.log(evt);
       evt.preventDefault();
-      console.log("拖动前的索引 :" + evt.oldIndex);
-      console.log("拖动后的索引 :" + evt.newIndex);
+      // console.log("拖动前的索引 :" + evt.oldIndex);
+      // console.log("拖动后的索引 :" + evt.newIndex);
       // console.log(this.dialogImageUrl15);
     },
     //添加第一个规格值
@@ -811,7 +818,7 @@ export default {
           }
         ]
       });
-      console.log(this.inputAll);
+      // console.log(this.inputAll);
     },
 
     //添加第二个规格值
@@ -823,8 +830,8 @@ export default {
         // }
       }
       this.inputAllTwo.push({ attributeValue: "" });
-      console.log(this.inputAllTwo);
-      console.log(this.inputAll);
+      // console.log(this.inputAllTwo);
+      // console.log(this.inputAll);
     },
     //确定添加
     SureToAdd() {
@@ -838,10 +845,10 @@ export default {
       //     return;
       //   }
       // }
-      console.log(this.inputAllTwo);
+      // console.log(this.inputAllTwo);
       this.inputAll.forEach(element => {
         // element.arr = [];
-        console.log(element);
+        // console.log(element);
         for (let i = 0; i < this.inputAllTwo.length; i++) {
           if (element.arr[i] != undefined) {
             if (
@@ -854,7 +861,7 @@ export default {
             }
           } else {
             if (this.inputAllTwo[i].attributeValue == "") {
-              console.log(123);
+              // console.log(123);
               // element.arr.push({
               //   currentPrice: this.currentPrice,
               //   costPrice: this.costPrice,
@@ -878,18 +885,17 @@ export default {
           }
         }
       });
-      console.log(this.inputAll);
+      // console.log(this.inputAll);
       let commodityProperty = this.inputAll;
       for (let i = 0; i < commodityProperty.length; i++) {
         if (commodityProperty[i].oneGG == "") {
           commodityProperty.splice(i, 1);
         } else {
-          console.log(commodityProperty[i].arr.length);
-
+          // console.log(commodityProperty[i].arr.length);
           for (let l = 0; l < commodityProperty[i].arr.length; l++) {
-            console.log(commodityProperty[i].arr[l]);
+            // console.log(commodityProperty[i].arr[l]);
             if (commodityProperty[i].arr[l].attributeValue === undefined) {
-              console.log(commodityProperty[i].arr[l]);
+              // console.log(commodityProperty[i].arr[l]);
               commodityProperty[i].arr.splice(l, 1);
             }
           }
@@ -907,14 +913,18 @@ export default {
     },
     //上传1成功
     success1(response, file, fileList) {
-      console.log(response, file);
-      console.log(fileList, "成功");
-      this.dialogImageUrl1.push("https://images.baiduyuyue.com/" + file.uid);
-      console.log(this.dialogImageUrl1, "图片集合");
+      // console.log(response, file);
+      // console.log(fileList, "成功");
+      if (this.dialogImageUrl1.length > (this.inputAll.length - 1)) {
+        this.$message.warning("文件超过上限");
+      } else {
+        this.dialogImageUrl1.push("https://images.baiduyuyue.com/" + file.uid);
+      }
+      // console.log(this.dialogImageUrl1, "图片集合");
     },
     //超出1张
     exceed1(files, fileList) {
-      console.log(files, fileList);
+      // console.log(files, fileList);
       this.$message.warning(
         `当前限制选择 ${this.inputAll.length} 个文件，本次选择了 ${
           files.length
@@ -927,22 +937,22 @@ export default {
     },
     //拖动1张图片
     datadragEnd1(evt) {
-      console.log(evt);
+      // console.log(evt);
       evt.preventDefault();
-      console.log("拖动前的索引 :" + evt.oldIndex);
-      console.log("拖动后的索引 :" + evt.newIndex);
+      // console.log("拖动前的索引 :" + evt.oldIndex);
+      // console.log("拖动后的索引 :" + evt.newIndex);
       // console.log(this.dialogImageUrl15);
     },
     //预览
     preview() {
-      console.log(this.GLclassifyId, "分类id");
+      // console.log(this.GLclassifyId, "分类id");
       if (this.GLclassifyId == "") {
         this.$message.warning("请先选择分类");
         // categoryId
         return;
       }
       let imageUrl = ""; //主图
-      console.log(this.dialogImageUrl.length);
+      // console.log(this.dialogImageUrl.length);
       if (this.dialogImageUrl.length != 0) {
         imageUrl = this.dialogImageUrl[0].imageUrl;
         this.imageUrl = this.dialogImageUrl[0].imageUrl;
@@ -954,31 +964,31 @@ export default {
         this.$message.warning("请添加商品图");
         return;
       }
-      console.log(this.originalPrice, "原价");
+      // console.log(this.originalPrice, "原价");
       if (this.originalPrice == "") {
         this.$message.warning("请输入原价");
         return;
         // productOriginalPrice
       }
-      console.log(this.currentPrice, "现价");
+      // console.log(this.currentPrice, "现价");
       if (this.currentPrice == "") {
         this.$message.warning("请输入现价");
         return;
         // productCurrentPrice
       }
-      console.log(this.costPrice, "成本价");
+      // console.log(this.costPrice, "成本价");
       if (this.costPrice == "") {
         this.$message.warning("请输入成本价");
         return;
         // productCostPrice
       }
-      console.log(this.title, "标题");
+      // console.log(this.title, "标题");
       if (this.title == "") {
         this.$message.warning("请输入标题");
         return;
         // productName
       }
-      console.log(this.metering, "计量单位");
+      // console.log(this.metering, "计量单位");
       if (this.metering == "") {
         this.$message.warning("请输入计量单位");
         return;
@@ -1073,13 +1083,45 @@ export default {
       }
       // console.log(commodityProperty);
       let yybProductSkuList = []; //商品属性集合
+      // for (let i = 0; i < this.inputAll.length; i++) {
+      //   console.log(this.inputAll[i]);
+      //   if (this.dialogImageUrl1[i] == undefined) {
+      //     console.log(this.dialogImageUrl1);
+      //     this.$message.warning("请上传规格图片");
+      //     return;
+      //   } else {
+      //     for (let l = 0; l < this.inputAll[i].arr.length; l++) {
+      //       if (this.inputAll[i].arr[l].attributeValue != undefined) {
+      //         yybProductSkuList.push({
+      //           imageUrl: this.dialogImageUrl1[i],
+      //           currentPrice: this.inputAll[i].arr[l].currentPrice,
+      //           costPrice: this.inputAll[i].arr[l].costPrice,
+      //           inventory: this.inputAll[i].arr[l].inventory,
+      //           skuCode: this.inputAll[i].arr[l].coding,
+      //           attributeValue1: this.inputAll[i].oneGG,
+      //           attributeValue2: this.inputAll[i].arr[l].attributeValue,
+      //           specificationName1: this.specificationOne,
+      //           specificationName2: this.specificationTwo
+      //         });
+      //       } else {
+      //         yybProductSkuList.push({
+      //           imageUrl: this.dialogImageUrl1[i],
+      //           currentPrice: this.inputAll[i].arr[l].currentPrice,
+      //           costPrice: this.inputAll[i].arr[l].costPrice,
+      //           inventory: this.inputAll[i].arr[l].inventory,
+      //           skuCode: this.inputAll[i].arr[l].coding,
+      //           attributeValue1: this.inputAll[i].oneGG,
+      //           attributeValue2: "",
+      //           specificationName1: this.specificationOne,
+      //           specificationName2: this.specificationTwo
+      //         });
+      //       }
+      //     }
+      //   }
+      // }
       for (let i = 0; i < this.inputAll.length; i++) {
         console.log(this.inputAll[i]);
-        if (this.dialogImageUrl1[i] == undefined) {
-          console.log(this.dialogImageUrl1);
-          this.$message.warning("请上传规格图片");
-          return;
-        } else {
+        if (this.dialogImageUrl1[i] != undefined) {
           for (let l = 0; l < this.inputAll[i].arr.length; l++) {
             if (this.inputAll[i].arr[l].attributeValue != undefined) {
               yybProductSkuList.push({
@@ -1107,6 +1149,9 @@ export default {
               });
             }
           }
+        } else {
+          this.$message.warning("请上传规格图片");
+          return;
         }
       }
       console.log(yybProductSkuList);
@@ -1247,34 +1292,33 @@ export default {
               if (this.compileTrue) {
                 //需要规格id
                 yybProductSpecificationList.push(
-                {
-                  specificationId: this.specificationOneId,
-                  specificationName: this.specificationOne,
-                  specificationSort: 0,
-                  yybProductSpecificationAttributeList: yybProductSpecificationAttributeList0
-                },
-                {
-                  specificationId: this.specificationTwoId,
-                  specificationName: this.specificationTwo,
-                  specificationSort: 1,
-                  yybProductSpecificationAttributeList: yybProductSpecificationAttributeList1
-                }
-              );
-              } else{
+                  {
+                    specificationId: this.specificationOneId,
+                    specificationName: this.specificationOne,
+                    specificationSort: 0,
+                    yybProductSpecificationAttributeList: yybProductSpecificationAttributeList0
+                  },
+                  {
+                    specificationId: this.specificationTwoId,
+                    specificationName: this.specificationTwo,
+                    specificationSort: 1,
+                    yybProductSpecificationAttributeList: yybProductSpecificationAttributeList1
+                  }
+                );
+              } else {
                 yybProductSpecificationList.push(
-                {
-                  specificationName: this.specificationOne,
-                  specificationSort: 0,
-                  yybProductSpecificationAttributeList: yybProductSpecificationAttributeList0
-                },
-                {
-                  specificationName: this.specificationTwo,
-                  specificationSort: 1,
-                  yybProductSpecificationAttributeList: yybProductSpecificationAttributeList1
-                }
-              );
+                  {
+                    specificationName: this.specificationOne,
+                    specificationSort: 0,
+                    yybProductSpecificationAttributeList: yybProductSpecificationAttributeList0
+                  },
+                  {
+                    specificationName: this.specificationTwo,
+                    specificationSort: 1,
+                    yybProductSpecificationAttributeList: yybProductSpecificationAttributeList1
+                  }
+                );
               }
-              
             }
           }
         }
@@ -1352,7 +1396,7 @@ export default {
           productCostPrice: this.costPrice, //成本价
           productStatus: this.task, //商品任务状态 0下架、1上架、3删除
           mailWay: this.distribution, //配送方式 1快递 2同城 3到店
-          userId: "1", //商户id
+          userId: this.userId, //商户id
           productUnit: this.metering, //计量单位
           imageUrl: imageUrl, //主图
           yybProductImageList: this.dialogImageUrl, //商品图集合
@@ -1371,7 +1415,31 @@ export default {
           console.log(res);
           if (res.data.status == 200) {
             this.$message.success("商品更新成功");
-            this.$emit("amend", {one: true,two: ''});
+            this.$emit("amend", { one: true, two: "" });
+          } else if (res.data.message == "商品规格明细操作失败") {
+            this.$message.warning("商品规格明细操作失败");
+          } else if (res.data.message == "商品规格属性操作失败") {
+            this.$message.warning("商品规格属性操作失败");
+          } else if (res.data.message == "商品规格操作失败") {
+            this.$message.warning("商品规格操作失败");
+          } else if (res.data.message == "商品相关图片操作失败") {
+            this.$message.warning("商品相关图片操作失败");
+          } else if (res.data.message == "商品基本信息更新失败") {
+            this.$message.warning("商品基本信息更新失败");
+          } else if (res.data.message == "商品图片更新失败") {
+            this.$message.warning("商品图片更新失败");
+          } else if (res.data.message == "商品图文详情图片更新失败") {
+            this.$message.warning("商品图文详情图片更新失败");
+          } else if (res.data.message == "请添加商品图文详情图") {
+            this.$message.warning("请添加商品图文详情图");
+          } else if (res.data.message == "商品规格更新失败") {
+            this.$message.warning("商品规格更新失败");
+          } else if (res.data.message == "同一规格下，不能有两个相同的属性") {
+            this.$message.warning("同一规格下，不能有两个相同的属性");
+          } else if (res.data.message == "商品规格属性更新失败") {
+            this.$message.warning("商品规格属性更新失败");
+          } else if (res.data.message == "商品规格明细更新失败") {
+            this.$message.warning("商品规格明细更新失败");
           }
         });
       } else {
@@ -1384,7 +1452,7 @@ export default {
           productCostPrice: this.costPrice, //成本价
           productStatus: this.task, //商品任务状态 0下架、1上架、3删除
           mailWay: this.distribution, //配送方式 1快递 2同城 3到店
-          userId: "1", //商户id
+          userId: this.userId, //商户id
           productUnit: this.metering, //计量单位
           imageUrl: imageUrl, //主图
           yybProductImageList: this.dialogImageUrl, //商品图集合
@@ -1403,14 +1471,14 @@ export default {
           console.log(res);
           if (res.data.status == 200) {
             this.$message.success("商品添加成功");
-            this.$emit("amend", {one: true,two: ''});
+            this.$emit("amend", { one: true, two: "" });
           }
         });
       }
     },
     //返回
     reverseBack() {
-      this.$emit("amend", {one: true,two: ''});
+      this.$emit("amend", { one: true, two: "" });
     }
   }
 };
@@ -1435,6 +1503,7 @@ h3 {
 }
 .drag-item {
   display: inline-block;
+  margin: 10px 0 0 10px;
 }
 .drag-item img {
   width: 146px;

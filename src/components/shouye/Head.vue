@@ -68,7 +68,7 @@
               <i class="el-icon-icon-order iconfont"></i>
               <span slot="title">订单管理</span>
             </el-menu-item>
-            <el-menu-item index="jurisdiction">
+            <el-menu-item index="discountCoupon">
               <i class="el-icon-icon-Coupon iconfont"></i>
               <span slot="title">优惠券管理</span>
             </el-menu-item>

@@ -52,12 +52,12 @@ router.beforeEach((to, from, next) => {
   // ${//to and from are Route Object,next() must be called to resolve the hook}
   if (to.path === '/login') {
     console.log(1)
-    console.log(sessionStorage.getItem('auditorId'));
+    console.log(sessionStorage.getItem('userId'));
     console.log(sessionStorage.getItem('abc'));
     next()
   } else {
-    if (sessionStorage.getItem('auditorId')) {
-      console.log(sessionStorage.getItem('auditorId'));      
+    if (sessionStorage.getItem('userId')) {
+      console.log(sessionStorage.getItem('userId'));      
       console.log('正确')
       next()
       // next({})
