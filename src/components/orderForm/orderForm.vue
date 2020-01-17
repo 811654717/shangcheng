@@ -167,7 +167,7 @@ export default {
 
 .commodity {
   height: 100%;
-  min-width: 2700px;
+  min-width: 2300px;
   max-width: 100%;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;

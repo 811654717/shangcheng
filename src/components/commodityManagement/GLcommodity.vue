@@ -286,7 +286,7 @@
         <div>
           <el-radio v-model="distribution" label="1">快递发货</el-radio>
           <!-- <el-radio v-model="distribution" label="2">同城配送</el-radio>
-          <el-radio v-model="distribution" label="3">到店自提</el-radio> -->
+          <el-radio v-model="distribution" label="3">到店自提</el-radio>-->
         </div>
       </div>
       <div class="MultipleChoice">
@@ -339,7 +339,7 @@ export default {
   },
   data() {
     return {
-      userId: '', //商户id
+      userId: "", //商户id
       token: "",
       GLclassifyId: "", //添加或者编辑的分类id
       options: [],
@@ -451,7 +451,23 @@ export default {
     //       element.arr[i].costPrice = this.costPrice;
     //     }
     //   });
-    // }
+    // },
+    //第二个规格名变化
+    specificationTwo: function name(params) {
+      if (this.specificationTwo == "") {
+        this.inputAllTwo = [{ attributeValue: "" }];
+        this.inputAll.forEach(item => {
+          item.arr = [
+            {
+              currentPrice: this.currentPrice,
+              costPrice: this.costPrice,
+              coding: "",
+              inventory: 0
+            }
+          ];
+        });
+      }
+    }
   },
   mounted() {
     this.options = this.classify;
@@ -461,7 +477,6 @@ export default {
       event.stopPropagation();
     };
     this.qiniuToken();
-    console.log(this.$parent.commodityID);
     if (this.$parent.commodityID != "") {
       this.compileTrue = true;
       this.commodityID = this.$parent.commodityID;
@@ -582,6 +597,8 @@ export default {
               for (let i = 0; i < this.inputAll.length; i++) {
                 for (let l = 0; l < this.inputAll[i].arr.length; l++) {
                   commodityDetails.forEach(element => {
+                    console.log(element);
+
                     if (
                       this.inputAll[i].attributeId == element.attributeId1 &&
                       this.inputAll[i].arr[l].attributeId ==
@@ -597,7 +614,7 @@ export default {
                 }
               }
             }
-            // console.log(this.inputAll);
+            console.log(this.inputAll);
             let img6 = res.data.data.yybProductImageList.sort(
               this.compare("imageSort")
             );
@@ -694,7 +711,7 @@ export default {
       Vue.axios
         .get(`https://www.baiduyuyue.com/appointment/qiniu/getQiniuUploadToken`)
         .then(res => {
-          // console.log(res);
+          console.log(res);
           if (res.data.status == 200) {
             this.token = res.data.data;
             this.qiniuData.token = res.data.data;
@@ -885,7 +902,7 @@ export default {
           }
         }
       });
-      // console.log(this.inputAll);
+      console.log(this.inputAll);
       let commodityProperty = this.inputAll;
       for (let i = 0; i < commodityProperty.length; i++) {
         if (commodityProperty[i].oneGG == "") {
@@ -894,13 +911,17 @@ export default {
           // console.log(commodityProperty[i].arr.length);
           for (let l = 0; l < commodityProperty[i].arr.length; l++) {
             // console.log(commodityProperty[i].arr[l]);
-            if (commodityProperty[i].arr[l].attributeValue === undefined) {
+            if (
+              commodityProperty[i].arr[l].attributeValue === undefined ||
+              commodityProperty[i].arr[l].attributeValue === ""
+            ) {
               // console.log(commodityProperty[i].arr[l]);
               commodityProperty[i].arr.splice(l, 1);
             }
           }
         }
       }
+      console.log(commodityProperty);
     },
     //上传1张之前
     beforeUploading1(file) {
@@ -915,7 +936,7 @@ export default {
     success1(response, file, fileList) {
       // console.log(response, file);
       // console.log(fileList, "成功");
-      if (this.dialogImageUrl1.length > (this.inputAll.length - 1)) {
+      if (this.dialogImageUrl1.length > this.inputAll.length - 1) {
         this.$message.warning("文件超过上限");
       } else {
         this.dialogImageUrl1.push("https://images.baiduyuyue.com/" + file.uid);
@@ -975,12 +996,24 @@ export default {
         this.$message.warning("请输入现价");
         return;
         // productCurrentPrice
+      } else {
+        if (Number(this.originalPrice) >= Number(this.currentPrice)) {
+        } else {
+          this.$message.warning("原价不能低于现价");
+          return;
+        }
       }
       // console.log(this.costPrice, "成本价");
       if (this.costPrice == "") {
         this.$message.warning("请输入成本价");
         return;
         // productCostPrice
+      } else {
+        if (Number(this.originalPrice) >= Number(this.costPrice)) {
+        } else {
+          this.$message.warning("原价不能低于成本价");
+          return;
+        }
       }
       // console.log(this.title, "标题");
       if (this.title == "") {
@@ -1066,21 +1099,20 @@ export default {
       }
       this.yybProductSpecificationList = yybProductSpecificationList;
       let commodityProperty = this.inputAll;
-      for (let i = 0; i < commodityProperty.length; i++) {
-        if (commodityProperty[i].oneGG == "") {
-          commodityProperty.splice(i, 1);
-        } else {
-          console.log(commodityProperty[i].arr.length);
-
-          for (let l = 0; l < commodityProperty[i].arr.length; l++) {
-            console.log(commodityProperty[i].arr[l]);
-            if (commodityProperty[i].arr[l].attributeValue === undefined) {
-              console.log(commodityProperty[i].arr[l]);
-              commodityProperty[i].arr.splice(l, 1);
-            }
-          }
-        }
-      }
+      // for (let i = 0; i < commodityProperty.length; i++) {
+      //   if (commodityProperty[i].oneGG == "") {
+      //     commodityProperty.splice(i, 1);
+      //   } else {
+      //     console.log(commodityProperty[i].arr.length);
+      //     for (let l = 0; l < commodityProperty[i].arr.length; l++) {
+      //       console.log(commodityProperty[i].arr[l]);
+      //       if (commodityProperty[i].arr[l].attributeValue === undefined) {
+      //         console.log(commodityProperty[i].arr[l]);
+      //         commodityProperty[i].arr.splice(l, 1);
+      //       }
+      //     }
+      //   }
+      // }
       // console.log(commodityProperty);
       let yybProductSkuList = []; //商品属性集合
       // for (let i = 0; i < this.inputAll.length; i++) {
@@ -1168,6 +1200,15 @@ export default {
           if (element.arr[i].costPrice === "") {
             this.$message.warning("请先输入商品成本价");
             return;
+          } else {
+            if (
+              Number(element.arr[i].currentPrice) >=
+              Number(element.arr[i].costPrice)
+            ) {
+            } else {
+              this.$message.warning("商品现价不能低于商品成本价");
+              return;
+            }
           }
           if (element.arr[i].coding === "") {
             this.$message.warning("请先输入商品编码");
@@ -1178,6 +1219,9 @@ export default {
             this.$message.warning("请先输入商品库存");
             return;
           }
+          // if (element.arr[i].attributeValue === "") {
+          //   element.arr.splice(i,1);
+          // }
         }
       }
       this.popupTrue = true;
@@ -1188,14 +1232,14 @@ export default {
     },
     //保存
     preserve() {
-      console.log(this.GLclassifyId, "分类id");
+      // console.log(this.GLclassifyId, "分类id");
       if (this.GLclassifyId == "") {
         this.$message.warning("请先选择分类");
         // categoryId
         return;
       }
       let imageUrl = ""; //主图
-      console.log(this.dialogImageUrl.length);
+      // console.log(this.dialogImageUrl.length);
       if (this.dialogImageUrl.length != 0) {
         imageUrl = this.dialogImageUrl[0].imageUrl;
         //商品图排序
@@ -1206,31 +1250,43 @@ export default {
         this.$message.warning("请添加商品图");
         return;
       }
-      console.log(this.originalPrice, "原价");
+      // console.log(this.originalPrice, "原价");
       if (this.originalPrice == "") {
         this.$message.warning("请输入原价");
         return;
         // productOriginalPrice
       }
-      console.log(this.currentPrice, "现价");
+      // console.log(this.currentPrice, "现价");
       if (this.currentPrice == "") {
         this.$message.warning("请输入现价");
         return;
         // productCurrentPrice
+      } else {
+        if (Number(this.originalPrice) >= Number(this.currentPrice)) {
+        } else {
+          this.$message.warning("原价不能低于现价");
+          return;
+        }
       }
-      console.log(this.costPrice, "成本价");
+      // console.log(this.costPrice, "成本价");
       if (this.costPrice == "") {
         this.$message.warning("请输入成本价");
         return;
         // productCostPrice
+      } else {
+        if (Number(this.originalPrice) >= Number(this.costPrice)) {
+        } else {
+          this.$message.warning("原价不能低于成本价");
+          return;
+        }
       }
-      console.log(this.title, "标题");
+      // console.log(this.title, "标题");
       if (this.title == "") {
         this.$message.warning("请输入标题");
         return;
         // productName
       }
-      console.log(this.metering, "计量单位");
+      // console.log(this.metering, "计量单位");
       if (this.metering == "") {
         this.$message.warning("请输入计量单位");
         return;
@@ -1262,7 +1318,7 @@ export default {
           });
         }
       });
-      console.log(this.specificationOne, "规格名");
+      // console.log(this.specificationOne, "规格名");
       if (this.specificationOne == "") {
         this.$message.warning("请选择规格名");
         return;
@@ -1289,45 +1345,44 @@ export default {
               this.$message.warning("请补充规格值");
               return;
             } else {
-              if (this.compileTrue) {
-                //需要规格id
-                yybProductSpecificationList.push(
-                  {
-                    specificationId: this.specificationOneId,
-                    specificationName: this.specificationOne,
-                    specificationSort: 0,
-                    yybProductSpecificationAttributeList: yybProductSpecificationAttributeList0
-                  },
-                  {
-                    specificationId: this.specificationTwoId,
-                    specificationName: this.specificationTwo,
-                    specificationSort: 1,
-                    yybProductSpecificationAttributeList: yybProductSpecificationAttributeList1
-                  }
-                );
-              } else {
-                yybProductSpecificationList.push(
-                  {
-                    specificationName: this.specificationOne,
-                    specificationSort: 0,
-                    yybProductSpecificationAttributeList: yybProductSpecificationAttributeList0
-                  },
-                  {
-                    specificationName: this.specificationTwo,
-                    specificationSort: 1,
-                    yybProductSpecificationAttributeList: yybProductSpecificationAttributeList1
-                  }
-                );
-              }
+              yybProductSpecificationList.push(
+                {
+                  specificationName: this.specificationOne,
+                  specificationSort: 0,
+                  yybProductSpecificationAttributeList: yybProductSpecificationAttributeList0
+                },
+                {
+                  specificationName: this.specificationTwo,
+                  specificationSort: 1,
+                  yybProductSpecificationAttributeList: yybProductSpecificationAttributeList1
+                }
+              );
             }
           }
         }
         console.log(yybProductSpecificationList);
       }
-
+      let specificationIdList = [];
+      if (this.compileTrue) {
+        if (this.specificationOneId != "") {
+          specificationIdList.push(this.specificationOneId);
+        }
+        if (this.specificationTwoId != "") {
+          specificationIdList.push(this.specificationTwoId);
+        }
+      }
+      for (let i = 0; i < this.inputAll.length; i++) {
+        if (this.inputAll[i].oneGG == "") {
+          this.inputAll.splice(i, 1);
+          if (this.dialogImageUrl1[i] != undefined) {
+            console.log(i);
+            this.dialogImageUrl1.splice(i, 1);
+          }
+        }
+      }
       let yybProductSkuList = []; //商品属性集合
       for (let i = 0; i < this.inputAll.length; i++) {
-        console.log(this.inputAll[i]);
+        console.log(this.inputAll[i], this.inputAll.length);
         if (this.dialogImageUrl1[i] != undefined) {
           for (let l = 0; l < this.inputAll[i].arr.length; l++) {
             if (this.inputAll[i].arr[l].attributeValue != undefined) {
@@ -1373,6 +1428,19 @@ export default {
           if (element.arr[i].costPrice === "") {
             this.$message.warning("请先输入商品成本价");
             return;
+          } else {
+            if (
+              Number(element.arr[i].currentPrice) >=
+              Number(element.arr[i].costPrice)
+            ) {
+            } else {
+              console.log(
+                Number(element.arr[i].currentPrice) >=
+                  Number(element.arr[i].costPrice)
+              );
+              this.$message.warning("商品现价不能低于商品成本价");
+              return;
+            }
           }
           if (element.arr[i].coding === "") {
             this.$message.warning("请先输入商品编码");
@@ -1402,8 +1470,10 @@ export default {
           yybProductImageList: this.dialogImageUrl, //商品图集合
           yybProductDetailsImageList: this.dialogImageUrl15, //图文详情集合
           yybProductSpecificationList: yybProductSpecificationList, //商品规格集合
-          yybProductSkuList: yybProductSkuList //单个商品详情集合
+          yybProductSkuList: yybProductSkuList, //单个商品详情集合
+          specificationIdList: specificationIdList //规格id集合
         };
+        console.log(postData);
         Vue.axios({
           method: "post",
           url: "/yybProduct/updateProduct",
@@ -1416,30 +1486,8 @@ export default {
           if (res.data.status == 200) {
             this.$message.success("商品更新成功");
             this.$emit("amend", { one: true, two: "" });
-          } else if (res.data.message == "商品规格明细操作失败") {
-            this.$message.warning("商品规格明细操作失败");
-          } else if (res.data.message == "商品规格属性操作失败") {
-            this.$message.warning("商品规格属性操作失败");
-          } else if (res.data.message == "商品规格操作失败") {
-            this.$message.warning("商品规格操作失败");
-          } else if (res.data.message == "商品相关图片操作失败") {
-            this.$message.warning("商品相关图片操作失败");
-          } else if (res.data.message == "商品基本信息更新失败") {
-            this.$message.warning("商品基本信息更新失败");
-          } else if (res.data.message == "商品图片更新失败") {
-            this.$message.warning("商品图片更新失败");
-          } else if (res.data.message == "商品图文详情图片更新失败") {
-            this.$message.warning("商品图文详情图片更新失败");
-          } else if (res.data.message == "请添加商品图文详情图") {
-            this.$message.warning("请添加商品图文详情图");
-          } else if (res.data.message == "商品规格更新失败") {
-            this.$message.warning("商品规格更新失败");
-          } else if (res.data.message == "同一规格下，不能有两个相同的属性") {
-            this.$message.warning("同一规格下，不能有两个相同的属性");
-          } else if (res.data.message == "商品规格属性更新失败") {
-            this.$message.warning("商品规格属性更新失败");
-          } else if (res.data.message == "商品规格明细更新失败") {
-            this.$message.warning("商品规格明细更新失败");
+          } else {
+            this.$message.warning(res.data.message);
           }
         });
       } else {
@@ -1472,6 +1520,8 @@ export default {
           if (res.data.status == 200) {
             this.$message.success("商品添加成功");
             this.$emit("amend", { one: true, two: "" });
+          } else {
+            this.$message.warning(res.data.message);
           }
         });
       }

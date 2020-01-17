@@ -80,7 +80,7 @@
               </tr>
             </table>
             <!-- v-if="this.commodityTotal != 0" -->
-            <div class="overflow">
+            <div class="overflow" v-if="this.commodityTotal != 0">
               <table>
                 <tr
                   v-for="(item, index) in commodityData"

@@ -38,10 +38,10 @@
               :value="item.value"
             ></el-option>
           </el-select>
-        </div> -->
+        </div>-->
         <div>
           <span>创建时间</span>
-          <el-date-picker
+          <!-- <el-date-picker
             v-model="time"
             type="datetimerange"
             align="right"
@@ -51,6 +51,14 @@
             start-placeholder="开始日期"
             end-placeholder="结束日期"
             :default-time="['00:00:00', '23:59:59']"
+          ></el-date-picker>-->
+          <el-date-picker style="width:400px"
+            v-model="value1"
+            type="daterange"
+            value-format="yyyy-MM-dd"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
           ></el-date-picker>
         </div>
         <div>
@@ -81,7 +89,7 @@
               </tr>
             </table>
             <!-- v-if="this.discountsTotal != 0" -->
-            <div class="overflow">
+            <div class="overflow" v-if="this.discountsTotal != 0">
               <table>
                 <tr
                   v-for="(item, index) in discountsData"
@@ -263,7 +271,7 @@ import { Message } from "element-ui";
 export default {
   data() {
     return {
-      userId: '', //商户id
+      userId: "", //商户id
       discountsData: [], //优惠券总数据
       discountsTotal: 0, //优惠券数据总条数
       discountsPageNum: 1, //优惠券当前页
@@ -318,8 +326,9 @@ export default {
       discount: "", //折扣数
       amount: "", //库存
       time1: [], //添加编辑的时间段
-      radio: "1" //任务状态
-      ,compileTrue: false, //是否点击了编辑
+      radio: "1", //任务状态
+      compileTrue: false //是否点击了编辑
+      ,value1: [],
     };
   },
 
@@ -351,10 +360,8 @@ export default {
   mounted() {
     this.inquire(); //获取数据
   },
-  watch: {
-  },
+  watch: {},
   methods: {
-
     //分类选择
     handleChange(value) {
       console.log(value);
@@ -377,7 +384,7 @@ export default {
     },
     // 搜索按钮
     inquire() {
-      console.log(this.time);
+      console.log(this.time,this.value1);
       let startDate = "";
       let endDate = "";
       if (this.time == null || this.time.length == 0) {
@@ -392,9 +399,7 @@ export default {
       this.discountsPageSize = 10;
       Vue.axios
         .get(
-          `/yybProductCoupon/queryAllCouponListByUserId?userId=${this.userId}&couponType=${
-            this.discountCouponId
-          }&pageNum=1&pageSize=10&startDate=${startDate}&endDate=${endDate}`
+          `/yybProductCoupon/queryAllCouponListByUserId?userId=${this.userId}&couponType=${this.discountCouponId}&pageNum=1&pageSize=10&startDate=${startDate}&endDate=${endDate}`
         )
         .then(res => {
           console.log(res);
@@ -416,11 +421,7 @@ export default {
       this.spinShow = true;
       Vue.axios
         .get(
-          `/yybProductCoupon/queryAllCouponListByUserId?userId=${this.userId}&couponType=${
-            this.discountCouponId
-          }&pageNum=${this.discountsPageNum}&pageSize=${
-            this.discountsPageSize
-          }&startDate=${startDate}&endDate=${endDate}`
+          `/yybProductCoupon/queryAllCouponListByUserId?userId=${this.userId}&couponType=${this.discountCouponId}&pageNum=${this.discountsPageNum}&pageSize=${this.discountsPageSize}&startDate=${startDate}&endDate=${endDate}`
         )
         .then(res => {
           console.log(res);
@@ -449,19 +450,23 @@ export default {
         this.$message.warning("请选择要编辑的优惠券");
         return;
       } else {
-        Vue.axios.get(`/yybProductCoupon/queryCouponByCouponId?couponId=${this.discountID}`).then(res=>{
-          console.log(res);
-          if (res.data.status == 200) {
-            let data = res.data.data;
-            this.XZdiscountCouponId = String(data.couponType);
-            this.AmountSatisfied = data.couponMeetAmount;
-            this.subtract = data.couponReductionAmount;
-            this.discount = data.couponDiscount;
-            this.amount = data.couponInventory;
-            this.radio = String(data.couponUseStatus);
-            this.time1.push(data.couponEffectiveTime,data.couponFailureTime)
-          }
-        })
+        Vue.axios
+          .get(
+            `/yybProductCoupon/queryCouponByCouponId?couponId=${this.discountID}`
+          )
+          .then(res => {
+            console.log(res);
+            if (res.data.status == 200) {
+              let data = res.data.data;
+              this.XZdiscountCouponId = String(data.couponType);
+              this.AmountSatisfied = data.couponMeetAmount;
+              this.subtract = data.couponReductionAmount;
+              this.discount = data.couponDiscount;
+              this.amount = data.couponInventory;
+              this.radio = String(data.couponUseStatus);
+              this.time1.push(data.couponEffectiveTime, data.couponFailureTime);
+            }
+          });
         this.popupTrue = true;
         this.compileTrue = true;
       }
@@ -477,9 +482,12 @@ export default {
         let xiaoshu = /^(?=0\.[1-9]|[1-9]\.\d).{3}$|^([1-9])$/;
         switch (this.XZdiscountCouponId) {
           case "1":
-             this.discount = ""; //折扣数
+            this.discount = ""; //折扣数
             if (number.test(this.AmountSatisfied)) {
-              if (number.test(this.subtract) && number.test(this.AmountSatisfied) > number.test(this.subtract)) {
+              if (
+                number.test(this.subtract) &&
+                number.test(this.AmountSatisfied) > number.test(this.subtract)
+              ) {
               } else {
                 this.$message.warning("请输入正确的金额");
                 return;
@@ -516,7 +524,7 @@ export default {
             break;
         }
       }
-      if (this.amount == '') {
+      if (this.amount == "") {
         this.amount = 0;
       }
       if (this.time1 == null || this.time1.length == 0) {
@@ -527,41 +535,41 @@ export default {
       if (this.compileTrue) {
         //编辑
         Vue.axios({
-          url: '/yybProductCoupon/updateCouponByCouponId',
-          method: 'post',
+          url: "/yybProductCoupon/updateCouponByCouponId",
+          method: "post",
           data: `couponId=${this.discountID}&${postData}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
           }
-        }).then(res=>{
+        }).then(res => {
           console.log(res);
           if (res.data.status == 200) {
             this.$message.success("编辑成功");
             this.shut();
             this.inquire();
-          }else{
+          } else {
             this.$message.warning(res.data.message);
           }
-        })
-      }else{
+        });
+      } else {
         //保存
         Vue.axios({
-          url: '/yybProductCoupon/insertCoupon',
-          method: 'post',
+          url: "/yybProductCoupon/insertCoupon",
+          method: "post",
           data: postData,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
           }
-        }).then(res=>{
+        }).then(res => {
           console.log(res);
           if (res.data.status == 200) {
             this.$message.success("添加成功");
             this.shut();
             this.inquire();
-          }else{
+          } else {
             this.$message.warning(res.data.message);
           }
-        })
+        });
       }
     },
     //更改状态为删除
@@ -593,13 +601,13 @@ export default {
     shut() {
       this.compileTrue = false;
       this.popupTrue = false;
-      this.XZdiscountCouponId = "", //新增或者编辑选择的优惠券id
-      this.AmountSatisfied = ""; //满减满足的金额
+      (this.XZdiscountCouponId = ""), //新增或者编辑选择的优惠券id
+        (this.AmountSatisfied = ""); //满减满足的金额
       this.subtract = ""; //满减的金额
       this.discount = ""; //折扣数
       this.amount = ""; //库存
       this.time1 = []; //添加编辑的时间段
-      this.radio = '1'; //任务状态
+      this.radio = "1"; //任务状态
     }
   }
 };
